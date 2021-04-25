@@ -1,2 +1,4 @@
 # SDS2-HW1
-This is the first Tardella's Homework @ University of La Sapienza, Rome
+Repository for the first homework of Statistical Methods for Data Science II @ Sapienza University of Rome
+
+Scripts made by Jeremy Sapienza
