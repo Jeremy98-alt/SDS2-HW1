@@ -170,20 +170,15 @@ $$
   s = \mathbb{E}[\theta] \cdot \frac{\mathbb{E}[\theta]}{\mathbb{Var}[\theta]} \\
   r = \frac{\mathbb{E}[\theta]}{\mathbb{Var}[\theta]}
 \end{cases}
-\rightarrow
-\begin{cases}
-  s = \mathbb{E}[\theta] \cdot \frac{\mathbb{E}[\theta]}{\mathbb{Var}[\theta]} \\
-  r = \frac{\mathbb{E}[\theta]}{\mathbb{Var}[\theta]}
-\end{cases}
 $$
 
-In this case we prefer considering as our prior subjective belief of $s = \mathbb{E}[\theta] \cdot \frac{\mathbb{E}[\theta]}{\mathbb{Var}[\theta]} = 2.46$ (where $\mathbb{E}[\theta] = 3.22$ and the $\mathbb{Var}[\theta] = \mathbb{Var}(y_{obs}) = 4.21$ ) and $r = \frac{\mathbb{E}[\theta]}{\mathbb{Var}[\theta]} = 0.58$
+In this case we prefer considering as our prior subjective belief of $s = \mathbb{E}[\theta] \cdot \frac{\mathbb{E}[\theta]}{\mathbb{Var}[\theta]} \approx 2.46$ (where $\mathbb{E}[\theta] = 3.22$ and the $\mathbb{Var}[\theta] = \mathbb{Var}(y_{obs}) \approx 4.21$) and $r = \frac{\mathbb{E}[\theta]}{\mathbb{Var}[\theta]} \approx 0.76$
 
 ```{r echo=FALSE}
 # prior parameters
 E_x <- 3.22
 s_prior <- (E_x^2)/var(y_obs)
-r_prior <- s_prior/var(y_obs)
+r_prior <- E_x/var(y_obs)
 
 # updated parameters
 r_post <- r_prior + length(y_obs)
@@ -200,7 +195,7 @@ $$~$$
 Now, after defining the main concept of the prior and likelihood functions, let's move on the posterior update concept $\pi(\theta|y_1, ..., y_n)$, We apply as we can shown above the conjugancy analysis, in this way:
 
 $$
-\pi(\theta|y_1, ..., y_n) = \frac{\pi(y_1, ..., y_n|\theta)\pi(\theta)}{\pi(y_1, ..., y_n)} \propto \pi(y_1, ..., y_n|\theta)\pi(\theta) \\ \propto e^{-n\theta}\theta^{\sum_{i=1}^{n} y_i}e^{-r\theta}\theta^{s-1} \propto e^{-(n+r)\theta}\theta^{(s+\sum_{i=1}^{n} y_i)-1} 
+\pi(\theta|y_1, ..., y_n) = \frac{\pi(y_1, ..., y_n|\theta)\pi(\theta)}{\pi(y_1, ..., y_n)} \propto \pi(y_1, ..., y_n|\theta)\pi(\theta) \\ =e^{-n\theta}\theta^{\sum_{i=1}^{n} y_i}e^{-r\theta}\theta^{s-1} = e^{-(n+r)\theta}\theta^{(s+\sum_{i=1}^{n} y_i)-1} 
 $$
 
 In this way we avoid the constats to see the shape of the posterior distribution. We found that the posterior is also a Gamma distribution due to the theta parameter expressed and for the prior distribution, the parameters described are:
@@ -257,10 +252,10 @@ Here we can see the point estimates over the posterior uncertainty:
 ```{r fig.align="center", echo=FALSE}
 curve(dgamma(x, rate=r_post, shape=s_post), from=2.5, to=5, xlab=expression(theta), ylab= TeX("$\\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="red2")
 title(main = "Point estimates", col.main= "black")
-abline(v=3.8531, lty=1, col = "red")
+abline(v=3.8531, lty=1, col = "black")
 abline(v=3.8872, lty=1, col = "green")
 abline(v=3.9042,lty=1, col = "purple")
-legend("topright", legend=c("Mode", "Median", "Mean"), col=c("red", "green", "purple"), lty=1, cex=0.8)
+legend("topright", legend=c("Mode", "Median", "Mean"), col=c("black", "green", "purple"), lty=1, cex=0.8)
 grid()
 ```
 
@@ -352,10 +347,10 @@ grid()
 As we can see the posterior is slightly different on its direction, after the updated value of the $\theta$ parameter
 
 ```{r fig.align="center", echo=FALSE}
-curve(dgamma(x, rate=r_prior, shape=s_prior), from=0, to=15, xlab=expression(theta), ylab= TeX("$\\pi(\\theta)$"), main="", cex.main=0.5,col="blue2", ylim= c(0, 1))
+curve(dgamma(x, rate=r_prior, shape=s_prior), from=0, to=15, xlab=expression(theta), ylab= TeX("$\\pi(\\theta) + \\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="blue2", ylim= c(0, 1))
 grid()
 
-curve(dgamma(x, rate=r_post, shape=s_post), from=0, to=15, xlab=expression(theta), ylab= TeX("$\\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="red2", add=TRUE, ylim= c(0, 1))
+curve(dgamma(x, rate=r_post, shape=s_post), from=0, to=15, xlab=expression(theta), main="", cex.main=0.5,col="red2", add=TRUE, ylim= c(0, 1))
 grid()
 
 title(main = "Prior + Posterior", col.main= "black")
@@ -427,8 +422,10 @@ m <- (s_prior+sum(y_obs))
 plot(0:20, dnbinom(0:20,p = p, size = m),pch=6,col="red", main = TeX("Posterior Predictive Distribution $Y_{next}|y_1, ..., y_n \\sim NegBin (p, m)$"), xlab = TeX("$\\theta$"), ylab = TeX("$\\pi(Y_{next}|y_1, ..., y_n)$"))
 
 post_mean <- (s_prior+sum(y_obs))/(r_prior+n)
-points(0:20,dpois(0:20,lambda = post_mean),pch="x",col="blue")
+points(0:20,dpois(0:20,lambda = post_mean),pch=6,col="blue")
 grid()
+
+legend("topright", legend=c("Predictions", "Observations"), col=c("red", "blue"), pch=6, cex=0.8)
 ```
 
 
@@ -436,3 +433,227 @@ $$~$$
 
 ## **Part II**
 ### ***Bulb lifetime***
+
+$$~$$
+
+## Setup
+
+$$~$$
+
+For this setting imagine that I developed an innovative bulb and my goal is to characterize them statistically. We consider 20 innovative bulbs to determine their lifetimes, I observe the follwing data expressed in terms of hours:
+
+```{r fig.align="center", echo=FALSE}
+y_obs_bulbs <- c(1, 13, 27, 43, 73, 75, 154, 196, 220, 297,
+344, 610, 734, 783, 796, 845, 859, 992, 1066, 1471)
+y_obs_bulbs
+summary(y_obs_bulbs)
+```
+
+The distribution of these data is:
+
+```{r fig.align="center", echo=FALSE}
+hist(y_obs_bulbs, col="orchid2", main="Distribution of the data")
+```
+
+Based on my experience with light bulbs, I believe that these observations $Y_i$ described their lifetimes using an **exponential distribution** conditionally on $\theta$, the likelihood function is written in this way:
+
+$$
+f(y_1, ..., y_n|\theta) \sim Exponential(\theta)\\
+Y_1, ..., Y_n|\theta \sim f(y_1, ..., y_n|\theta) = \prod_{i=1}^{f} (y_i|\theta) = \prod_{i=1}^{n} \theta e^{\theta  y_i} = \theta^{n}e^{-\theta \sum_{i=1}^{n} y_i}
+$$
+
+$$~$$
+
+## The ingredients of the Bayesian model
+
+$$~$$
+
+As we described in the first part of this homework, we are interested to calculate the posterior distribution in order to update well the parameter of interest. Now, we are focussing on the choice of the suitable prior distribution.
+
+For this exercise in order to choose a suitable prior distribution $\pi(\theta)$ we decide to pick the gamma distribution to be able to apply the conjugate analysis, the form is a we can see above.
+
+$$
+\pi(\theta) = \frac{r^{s}\theta^{s-1}e^{-r\theta}}{\Gamma(s)} \mathbb{I}_{(0, +\infty)} (\theta) \\
+where \,\,\, \mathbb{E}[\theta] = 0.003 \,\,\, and \,\,\, \mathbb{V}[\theta] = (0.00173)^2 
+$$
+
+I assume that these choices are only a vague prior opinion because we don't know how these values fits on my $y_1, ..., y_n$. For having a confirmation is necessary to apply the Bayes' rule in order to see how change my uncertainty. The uncertain quantity is the probability distribution that would express one's beliefs about this quantity before some evidence is taken into account.
+
+$$~$$
+
+### Conjugate Bayesian analysis
+
+$$~$$
+
+Initially, we need to fix the values of the prior parameters (rate and shape) of the gamma distribution:
+
+$$
+\begin{cases}
+  \mathbb{E}[\theta] = \frac{s}{r} \\
+  (\mathbb{Var}[\theta])^2 = \frac{s}{r^2}
+\end{cases}
+\rightarrow
+\begin{cases}
+  s = \mathbb{E}[\theta] \cdot r \\
+  (\mathbb{Var}[\theta])^2 = \frac{\mathbb{E}[\theta] \cdot r}{r^2}
+\end{cases}
+\rightarrow
+\begin{cases}
+  s = \mathbb{E}[\theta] \cdot \frac{\mathbb{E}[\theta]}{(\mathbb{Var}[\theta])^2} \\
+  r = \frac{\mathbb{E}[\theta]}{(\mathbb{Var}[\theta])^2}
+\end{cases}
+\rightarrow
+\begin{cases}
+  s \approx 3.007 \\
+  r \approx 1002.37
+\end{cases}
+$$
+
+At the end, the prior parameters for the prior distribution are $\pi(\theta) \sim Gamma \Big(r = 1002.37, s = 3.007 \Big)$
+
+As we can seen now we can setup the framework to fit it to the Bayesian analysis and get the posterior parameters, this means:
+
+$$
+\pi(\theta|y_1, ..., y_n) = \frac{\pi(y_1, ..., y_n|\theta)\pi(\theta)}{\pi(y_1, ..., y_n)} \propto \pi(y_1, ..., y_n|\theta)\pi(\theta) = \\
+= \theta^{n}e^{-\theta \sum_{i=1}^{n} y_i} \cdot \theta^{s-1} e^{-r\theta} = \theta^{(s+n)-1}e^{-\theta(r+\sum_{i=1}^{n} y_i)}
+$$
+
+The posterior parameters of the gamma posterior distribution are:
+
+$$
+\pi(\theta|y_1, ..., y_n) \sim Gamma\Big(r^* = r + \sum_{i=1}^{n} y_i, \,\, s^* = s + n\Big)
+$$
+
+The shapes of the prior and the posterior follow this behaviour, considering the formula to calculate the rate and shape prior parameters and counting the mean and standard deviation considered in the previous section:
+
+```{r fig.align="center", echo=FALSE}
+E_x <- 0.003
+Var_x <- (0.00173)*(0.00173)
+
+r_prior <- E_x/Var_x
+s_prior <- E_x*r_prior
+
+curve(dgamma(x, rate=r_prior, shape=s_prior), from=0, to=0.010, xlab=expression(theta), ylab= TeX("$\\pi(\\theta) + \\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="blue2", ylim= c(0, 900))
+grid()
+
+r_post <- r_prior + sum(y_obs_bulbs)
+s_post <- s_prior + length(y_obs_bulbs)
+  
+curve(dgamma(x, rate=r_post, shape=s_post), from=0, to=0.010, xlab=expression(theta), main="", cex.main=0.5,col="red2", add=TRUE, ylim= c(0, 900))
+grid()
+
+title(main = "Prior + Posterior", col.main= "black")
+legend("topright", legend=c("Prior", "Posterior"), col=c("blue2", "red2"), lty=1, cex=0.8)
+```
+
+This is a result that we expected due to the behaviour of the prior distribution and the next values obtained in the next chapter. The behaviour of the posterior distribution is shown above.
+
+$$~$$
+
+## Commenting on the characteristics of the lifetime of these innovative bulbs
+
+$$~$$
+
+To be more sure about the lifetime of a bulb, we can make suitable analysis considering the point estimates to see well which is the hypothetical $\theta$ parameter and later makes also the HPD interval to see where the theta parameter can fall.
+
+We can use the different point estimates to summarize the uncertainty (theta) distribution with only one value (using sometimes the closed forms), such as:
+
+$$~$$
+
+- **posterior mode** $\hat{\theta}_{bayes}^{mode}$: this represents the higher value of $\theta$ for which we want: $\hat{\theta}_{bayes}^{mo} = \operatorname{argmax}_{\theta \in \Theta} \pi(\theta|y^{obs}) = \frac{s^*-1}{r^*}$
+
+```{r fig.align="center", echo=FALSE}
+theta_mode <- (s_post-1)/r_post
+print(paste("The posterior mode is equal to: ", round(theta_mode, 4), sep=""))
+```
+
+$$~$$
+
+- **posterior median** $\hat{\theta}_{bayes}^{med}$: this represents the possibility to find the value of $\theta$ in the interval $\in (\infty, med)$ for which: \ $$\hat{\theta}_{bayes}^{med} = {\displaystyle \int_{-\infty}^{\hat{\theta}_{bayes}^{med}}} \pi(\theta|y^{obs}) \,d\theta$$
+
+```{r fig.align="center", echo=FALSE}
+theta_median <- qgamma(0.5, shape=s_post, rate=r_post)
+print(paste("The posterior median is equal to: ", round(theta_median, 4), sep=""))
+```
+
+$$~$$
+
+- **posterior mean** $\hat{\theta}_{bayes}^{mean}$: this represents: $\hat{\theta}_{bayes}^{mean} =   \mathbb{E}(\theta|y^{obs}) = \frac{s^*}{r^*}$
+
+```{r fig.align="center", echo=FALSE}
+theta_mean <- s_post/r_post
+print(paste("The posterior mean is equal to: ", round(theta_mean, 4), sep=""))
+```
+
+$$~$$
+
+Here we can see the point estimates over the posterior uncertainty:
+
+```{r fig.align="center", echo=FALSE}
+curve(dgamma(x, rate=r_post, shape=s_post), from=0, to=0.005, xlab=expression(theta), ylab= TeX("$\\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="red2")
+abline(v=0.0021, lty=1, col = "green")
+abline(v=0.0022,lty=1, col = "purple")
+legend("topright", legend=c("Mode-Median", "Mean"), col=c("green", "purple"), lty=1, cex=0.8)
+grid()
+
+interval_estimate_hpd <- TeachingDemos::hpd(posterior.icdf = posterior_qf, conf=0.95)
+
+print("The actual region of the HPD region is: ")
+range(interval_estimate_hpd)
+
+title(main = "Points estimates and HPD Region", col.main= "black")
+abline(v=interval_estimate_hpd[1],lty=3)
+abline(v=interval_estimate_hpd[2],lty=3)
+abline(h=dgamma(interval_estimate_hpd[1], shape = s_post, rate = r_post), lty=3)
+grid()
+```
+
+As we can see the actual $\theta$ is probably equal to 0.002.
+
+Instead, considering the reparametrization of $\theta$ in $\psi = \frac{1}{\theta}$ we maybe say something interesting, let's do it:
+
+- **posterior mode** $\hat{\psi}_{bayes}^{mode} = \frac{1}{\hat{\theta}_{bayes}^{mode}}$
+
+```{r fig.align="center", echo=FALSE}
+print(paste("The posterior mode is equal to: ", round(1/theta_mode, 4), sep=""))
+```
+
+- **posterior median** $\hat{\psi}_{bayes}^{med} = \frac{1}{\hat{\theta}_{bayes}^{med}}$
+
+```{r fig.align="center", echo=FALSE}
+print(paste("The posterior median is equal to: ", round(1/theta_median, 4), sep=""))
+```
+
+- **posterior mean** $\hat{\psi}_{bayes}^{mean} = \frac{1}{\hat{\theta}_{bayes}^{mean}}$
+
+```{r fig.align="center", echo=FALSE}
+print(paste("The posterior mean is equal to: ", round(1/theta_mean, 4), sep=""))
+```
+
+$$~$$
+
+With these amazing results, the procedures in this moment are very loyal. The $\theta$ parameter is correct much probably, also because we have the posterior mean is almost equal to the true mean of these observations!
+
+$$~$$
+
+## Answering to Boss' request
+
+$$~$$
+
+To answer to Boss' request is neeeded to setup a simple procedure in order to get the probability that the average bulb lifetime $\psi = \frac{1}{\theta}$, so: 
+
+$$
+\pi(\psi > 550) = \pi\Big(\frac{1}{\theta} > 550\Big) = \pi\Big(\theta > \frac{1}{550}\Big) = 1 - \pi\Big(\theta < \frac{1}{550}\Big)
+$$
+
+Now, I can consider the theta parameters to handle this kind of probability, so the probability to have the bulb lifetime over 550 is:
+
+$$~$$
+
+```{r}
+pgamma(1/550, shape = s_post, rate = r_post)
+```
+
+$$~$$
+
+The probability achieved from the previous calculus says that only 22% of bulbs have a lifetime that exceeds over 550 hours. With these calculus is simple to note that considering the bayesian parameters calculated with the conjugate analysis the result achieved is more loyal, given the posterior parameters. This gives a probabily precise on the uncertainty of the parameter calculated.
