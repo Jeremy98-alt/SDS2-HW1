@@ -352,9 +352,9 @@ range(interval_estimate_hpd)
 
 curve(dgamma(x, rate=r_post, shape=s_post), from=2.5, to=5.5, xlab=expression(theta), ylab= TeX("$\\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="red2", lwd=2)
 title(main = "HPD Region at 95% of confidence", col.main= "black")
-abline(v=interval_estimate_hpd[1],lty=3)
-abline(v=interval_estimate_hpd[2],lty=3)
-abline(h=dgamma(interval_estimate_hpd[1], shape = s_post, rate = r_post), lty=3)
+abline(v=interval_estimate_hpd[1],lty=3, lwd=2)
+abline(v=interval_estimate_hpd[2],lty=3, lwd=2)
+abline(h=dgamma(interval_estimate_hpd[1], shape = s_post, rate = r_post), lty=3, lwd=2)
 grid()
 
 ```
@@ -394,9 +394,9 @@ and surely other measurement.. As we can see the posterior is slightly different
 
 ```{r fig.align="center", echo=FALSE}
 curve(dgamma(x, rate=r_prior, shape=s_prior), from=0, to=15, xlab=expression(theta), ylab= TeX("$\\pi(\\theta) + \\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="blue2", ylim= c(0, 0.90), lwd=2)
-abline(v=s_prior/r_prior, lty=3, col = "black")
-abline(v=qgamma(0.5, shape=s_prior, rate=r_prior), lty=3, col = "green")
-abline(v=(s_prior-1)/r_prior, col = "purple", lty=3)
+abline(v=s_prior/r_prior, lty=3, col = "black", lwd=2)
+abline(v=qgamma(0.5, shape=s_prior, rate=r_prior), lty=3, col = "green", lwd=2)
+abline(v=(s_prior-1)/r_prior, col = "purple", lty=3, lwd=2)
 
 curve(dgamma(x, rate=r_post, shape=s_post), from=0, to=15, xlab=expression(theta), main="", cex.main=0.5,col="red2", add=TRUE, ylim= c(0, 0.90), lwd=2)
 abline(v=s_post/r_post, lty=1, col = "black")
@@ -407,12 +407,12 @@ grid()
 title(main = "Comparison of the prior and posterior distribution", col.main= "black")
 legend("topright", legend=c("Prior", "Posterior", "Mean", "Median", "Mode"), col=c("blue", "red", "black", "green", "purple"), lty=1, cex=0.8)
 
-curve(dgamma(x, rate=r_prior, shape=s_prior), from=0.8, to=5.5, xlab=expression(theta), ylab= TeX("$\\pi(\\theta) + \\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="blue2", ylim= c(0, 0.90), lwd=2)
-abline(v=s_prior/r_prior, lty=3, col = "black")
-abline(v=qgamma(0.5, shape=s_prior, rate=r_prior), lty=3, col = "green")
-abline(v=(s_prior-1)/r_prior, lty=3, col = "purple")
+curve(dgamma(x, rate=r_prior, shape=s_prior), from=0, to=5.5, xlab=expression(theta), ylab= TeX("$\\pi(\\theta) + \\pi(\\theta | y_1, ..., y_n)$"), main="", cex.main=0.5,col="blue2", ylim= c(0, 0.90), lwd=2)
+abline(v=s_prior/r_prior, lty=3, col = "black", lwd=2)
+abline(v=qgamma(0.5, shape=s_prior, rate=r_prior), lty=3, col = "green", lwd=2)
+abline(v=(s_prior-1)/r_prior, lty=3, col = "purple", lwd=2)
 
-curve(dgamma(x, rate=r_post, shape=s_post), from=0.8, to=5.5, xlab=expression(theta), main="", cex.main=0.5,col="red2", add=TRUE, ylim= c(0, 0.90), lwd=2)
+curve(dgamma(x, rate=r_post, shape=s_post), from=0, to=5.5, xlab=expression(theta), main="", cex.main=0.5,col="red2", add=TRUE, ylim= c(0, 0.90), lwd=2)
 abline(v=s_post/r_post, lty=1, col = "black")
 abline(v=qgamma(0.5, shape=s_post, rate=r_post), lty=1, col = "green")
 abline(v=(s_post-1)/r_post,lty=1, col = "purple")
@@ -484,18 +484,35 @@ $$
 
 below is shown a simple code to illustrate this kind of posterior prediction based on the y_obs:
 
-```{r}
+```{r fig.align="center", echo=FALSE}
 n <- length(y_obs)
 p <- (r_prior+n)/(r_prior+n+1)
 m <- (s_prior+sum(y_obs))
 
-plot(0:15, dnbinom(0:15,p = p, size = m),pch=6,col="red", main = TeX("Posterior Predictive Distribution $Y_{next}|y_1, ..., y_n \\sim NegBin (p, m)$"), xlab = TeX("$\\theta$"), ylab = TeX("$\\pi(Y_{next}|y_1, ..., y_n)$"))
+plot(0:12, dnbinom(0:12,p = p, size = m),pch=19,col="red", main = TeX("Posterior Predictive Distribution $Y_{next}|y_1, ..., y_n \\sim NegBin (p, m)$"), xlab = "y", ylab = TeX("$\\pi(Y_{next}|y_1, ..., y_n)$"))
 
 post_mean <- (s_prior+sum(y_obs))/(r_prior+n)
-points(0:15,dpois(0:15,lambda = post_mean),pch=6,col="blue")
+points(0:12,dpois(0:12,lambda = post_mean),pch=19,col="black")
 grid()
 
-legend("topright", legend=c("Predictions", "Observations"), col=c("red", "blue"), pch=6, cex=0.8)
+legend("topright", legend=c("Predictions", "Observations"), col=c("red", "black"), pch=19, cex=0.8)
+```
+
+$$~$$
+
+Considering the actual data, the behaviour is:
+
+```{r fig.align="center", echo=FALSE}
+bins <- tabulate(y_obs, nbins=length(y_obs))
+
+plot(bins[1:13]/length(y_obs), pch=19, col="red", main = TeX("$Y_{next}|y_1, ..., y_n \\sim NegBin (p, m)$ with the actual data"), xlab = "y", ylab = TeX("$\\pi(Y_{next}|y_1, ..., y_n)$"))
+lines(bins[1:13]/length(y_obs), lwd=2, type="l", col="grey", lty=3)
+
+lines(dnbinom(1:13, size = m, prob = p), lwd=3, type="h")
+points(dnbinom(1:13, size = m, prob = p),pch=19,col="black")
+grid()
+
+legend("topright", legend=c("Predictions", "Observations"), col=c("red", "black"), pch=c(19, NA), cex=0.8, lty = c(NA, 1))
 ```
 
 
@@ -564,13 +581,9 @@ grid()
 
 $$~$$
 
-The vague prior opinion is that the standard deviation is high, this means that the mean of the values is unstable and the dispersion of the values is high. In this plot we see that the different between each value is high.
+The vague prior opinion is that the standard deviation is high, this means that the mean of the values is unstable and the dispersion of the values is high. Considering the ratio $\frac {sd[\theta]}{E[\theta]} \approx 57\%$.
 
-<!-- ```{r echo=FALSE} -->
-<!-- paste("the variance of the prior distribution is: ", s_prior/(r_prior)^2) -->
-<!-- ``` -->
-
-<!-- In this case we see that the variance of the prior parameters is strictly high, so this mean that our uncertainty is large at the moment. -->
+Is important to denote that reparametrizing the prior parameters of the gamma distribution and working on the posterior mean, the posterior mean is a convex combination of the prior mean and the sample mean and for this reason the standard deviation is related to the mean of the values. 
 
 $$~$$
 
@@ -693,9 +706,9 @@ print("The actual region of the HPD region is: ")
 range(interval_estimate_hpd)
 
 title(main = "Points estimates and HPD Region at 95% of confidence", col.main= "black")
-abline(v=interval_estimate_hpd[1],lty=3)
-abline(v=interval_estimate_hpd[2],lty=3)
-abline(h=dgamma(interval_estimate_hpd[1], shape = s_post, rate = r_post), lty=3)
+abline(v=interval_estimate_hpd[1],lty=3, lwd=2)
+abline(v=interval_estimate_hpd[2],lty=3, lwd=2)
+abline(h=dgamma(interval_estimate_hpd[1], shape = s_post, rate = r_post), lty=3, lwd=2)
 grid()
 ```
 
@@ -731,15 +744,13 @@ $$~$$
 
 $$~$$
 
-Recalling that the posterior distribution is a gamma distribution, in order to answer to Boss' request is neeeded to setup a simple procedure in order to get the probability that the average bulb lifetime $\psi = \frac{1}{\theta}$: 
+Recalling that the posterior distribution is a gamma distribution, to answer to Boss' request is needed to setup a simple procedure in order to get the probability that the average bulb lifetime is $\psi = \frac{1}{\theta}$ and $Y = y_1,...,y_n$: 
 
 $$
-\pi(\psi > 550) = \pi\Big(\frac{1}{\theta} > 550\Big) = \pi\Big(\theta > \frac{1}{550}\Big) = 1 - \pi\Big(\theta < \frac{1}{550}\Big)
+P(\psi > 550 | Y) = P\Big(\frac{1}{\theta} > 550 \Big| Y\Big) = P\Big(\theta < \frac{1}{550} \Big| Y\Big)
 $$
 
-Now, I can consider the theta parameters to handle this kind of probability, so the probability to have the bulb lifetime over 550 is:
-
-$$~$$
+Considering the posterior theta parameters, the probability to have the bulb lifetime over 550 is:
 
 ```{r}
 pgamma(1/550, shape = s_post, rate = r_post)
@@ -747,4 +758,4 @@ pgamma(1/550, shape = s_post, rate = r_post)
 
 $$~$$
 
-The probability achieved from the previous calculus says that only 22% of bulbs have a lifetime that exceeds over 550 hours. With these calculus is simple to note that considering the bayesian parameters calculated with the conjugate analysis the result achieved is more loyal, given the posterior parameters. This gives a probabily precise on the uncertainty of the parameter calculated.
+The probability achieved from the previous calculus says that only 22% of bulbs have a lifetime that exceeds over 550 hours. With these calculus is simple to note that considering the bayesian parameters calculated with the conjugate analysis the result achieved is consistent, given the posterior parameters.
